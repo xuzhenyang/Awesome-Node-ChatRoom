@@ -60,6 +60,7 @@
         <button type="submit" id="login">login</button>
     </div>
     <div id="chatbox" style="display:none">
+        <p id="loginInfo"></p>
         <ul id="messages"></ul>
         <form action="">
             <input id="m" autocomplete="off" /><button id="sendMsg">Send</button>
@@ -90,6 +91,12 @@
         });
         socket.on('chat message', function(msg){
             $('#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
+        });
+        socket.on('loginInfo', function(obj){
+            $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
+        });
+        socket.on('logoutInfo', function(obj){
+            $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
         });
     </script>
 
