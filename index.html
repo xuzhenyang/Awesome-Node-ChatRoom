@@ -81,7 +81,10 @@
                 'username' : username,
                 'content' : $('#m').val()
             };
-            socket.emit('chat message', message);
+            if(message.content != '')
+            {
+                socket.emit('chat message', message);
+            }
             $('#m').val('');
             return false;
         });
