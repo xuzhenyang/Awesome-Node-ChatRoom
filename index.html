@@ -25,15 +25,16 @@
         form input {
             border: 0;
             padding: 10px;
-            width: 90%;
+            width: 70%;
             margin-right: .5%;
         }
         
         form button {
-            width: 9%;
+            width: 10%;
             background: rgb(130, 224, 255);
             border: none;
             padding: 10px;
+            margin-right: .5%;
         }
         
         #messages {
@@ -59,27 +60,56 @@
         <input type="text" id="username">
         <button type="submit" id="login">login</button>
     </div>
+    <div id="roombox" style="display:none">
+        <p>房间列表</p>
+        <ul>
+            <li id="room">1号房间</li>
+            <li id="room">2号房间</li>
+            <li id="room">3号房间</li>
+            <li id="room">4号房间</li>
+        </ul>
+    </div>
     <div id="chatbox" style="display:none">
         <p id="loginInfo"></p>
+        <p id="joinInfo"></p>
         <ul id="messages"></ul>
         <form action="">
-            <input id="m" autocomplete="off" /><button id="sendMsg">Send</button>
-        </form>
+            <input id="m" autocomplete="off" /><button id="sendMsg">Send</button><button id="leave">Leave</button>
     </div>
     <script>
         // var socket = io();
         var socket = io();
         var username;
+        var room;
         $('button#login').click(function(){
             username = $('input#username').val();
-            socket.emit('login', username);
+            socket.emit('login', {'username':username});
             $('div#loginbox').attr("style", "display:none");
+            $('div#roombox').attr("style", "display:block");
+            $('div#chatbox').attr("style", "display:none");
+            return false;
+        });
+        $('button#leave').click(function(){
+            // console.log('room : ' + room + ' username : ' + username);
+            socket.emit('leave', {'room':room, 'username':username});
+            $('div#loginbox').attr("style", "display:none");
+            $('div#roombox').attr("style", "display:block");
+            $('div#chatbox').attr("style", "display:none");
+            return false;
+        });
+        $('li#room').click(function(){
+            room = $(this).text();
+            // console.log('room : ' + room + ' username : ' + username);
+            socket.emit('join', {'room':room, 'username':username});
+            $('div#loginbox').attr("style", "display:none");
+            $('div#roombox').attr("style", "display:none");
             $('div#chatbox').attr("style", "display:block");
             return false;
         });
         $('form').submit(function(){
             var message = {
                 'username' : username,
+                'room' : room,
                 'content' : $('#m').val()
             };
             if(message.content != '')
@@ -97,6 +127,15 @@
         });
         socket.on('logoutInfo', function(obj){
             $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
+        });
+        socket.on('sysInfo', function(msg){
+            $('#messages').prepend($('<li>').text(msg));
+        });
+        socket.on('joinInfo', function(obj){
+            $('p#joinInfo').text("房间内人数 ：" + obj.count);
+        });
+        socket.on('leaveInfo', function(obj){
+            $('p#joinInfo').text("房间内人数 ：" + obj.count);
         });
     </script>
 
