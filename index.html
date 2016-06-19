@@ -62,6 +62,10 @@
     <script>
         var socket = io();
         $('form').submit(function(){
+            var smg = $("#m").val();
+            if(smg == null || smg == "" || smg == undefined){
+                return false;
+            }
             socket.emit('chat message', $('#m').val());
             $('#m').val('');
             return false;
