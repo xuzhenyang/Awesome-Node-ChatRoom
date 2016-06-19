@@ -50,30 +50,65 @@
             background: #eee;
         }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 </head>
 
 <body>
-    <ul id="messages"></ul>
-    <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <div id="loginbox" style="display:block">
+        <input type="text" id="username">
+        <button type="submit" id="login">login</button>
+    </div>
+    <div id="chatbox" style="display:none">
+        <p id="loginInfo"></p>
+        <ul id="messages"></ul>
+        <form action="">
+            <input id="m" autocomplete="off" /><button id="sendMsg">Send</button>
+        </form>
+    </div>
     <script>
+        // var socket = io();
         var socket = io();
+        var username;
+        $('button#login').click(function(){
+            username = $('input#username').val();
+            socket.emit('login', username);
+            $('div#loginbox').attr("style", "display:none");
+            $('div#chatbox').attr("style", "display:block");
+            return false;
+        });
         $('form').submit(function(){
+<<<<<<< HEAD
             var smg = $("#m").val();
             if(smg == null || smg == "" || smg == undefined){
                 return false;
             }
             socket.emit('chat message', $('#m').val());
+=======
+            var message = {
+                'username' : username,
+                'content' : $('#m').val()
+            };
+            if(message.content != '')
+            {
+                socket.emit('chat message', message);
+            }
+>>>>>>> 9b7876b40608c560237c4a5e9407a839e21580c6
             $('#m').val('');
             return false;
         });
         socket.on('chat message', function(msg){
-            $('#messages').prepend($('<li>').text(msg));
+            $('#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
+        });
+        socket.on('loginInfo', function(obj){
+            $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
+        });
+        socket.on('logoutInfo', function(obj){
+            $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
         });
     </script>
+
+
 </body>
 
 </html>
