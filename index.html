@@ -2,88 +2,90 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <title>Socket.IO chat</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font: 13px Helvetica, Arial;
-        }
-        
-        form {
-            background: #000;
-            padding: 3px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        
-        form input {
-            border: 0;
-            padding: 10px;
-            width: 70%;
-            margin-right: .5%;
-        }
-        
-        form button {
-            width: 10%;
-            background: rgb(130, 224, 255);
-            border: none;
-            padding: 10px;
-            margin-right: .5%;
-        }
-        
-        #messages {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        #messages li {
-            padding: 5px 10px;
-        }
-        
-        #messages li:nth-child(odd) {
-            background: #eee;
-        }
-    </style>
+
+    
+    <!--<link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>-->
+
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/jquery.mobile.flatui.css" />
+
+    <script src="http://apps.bdimg.com/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 </head>
 
 <body>
     <div id="loginbox" style="display:block">
-        <input type="text" id="username">
-        <button type="submit" id="login">login</button>
+        <div style="margin-left: auto;margin-right: auto;margin-top: 100px;width: 20em;">
+            <div class="input-group">
+                <span class="input-group-addon "><span class="glyphicon glyphicon-user"> </span></span>
+                <input id="username" type="text" class="form-control" placeholder="用户名" aria-describedby="basic-addon1">
+            </div><br>
+            <button id="login" type="button" style="width:280px;" class="btn btn-default btn-info">加 入</button>
+        </div>
     </div>
     <div id="roombox" style="display:none">
-        <p>房间列表</p>
-        <ul>
-            <li id="room">1号房间</li>
-            <li id="room">2号房间</li>
-            <li id="room">3号房间</li>
-            <li id="room">4号房间</li>
-        </ul>
+        <div style="margin-left: auto;margin-right: auto;margin-top: 100px;width: 20em;">
+            <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间1</button>
+            <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间2</button>
+            <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间3</button>
+            <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间4</button>
+        </div>
     </div>
     <div id="chatbox" style="display:none">
-        <p id="loginInfo"></p>
-        <p id="joinInfo"></p>
-        <ul id="messages"></ul>
+        <div data-role="header" class="header linear-g">
+            <a id="joinInfo" class="text-center col-xs-8"></a>
+            <a href="#panel-right" data-iconpos="notext" class="glyphicon glyphicon-user col-xs-2 text-left"> </a>
+        </div>
+        <!--<p id="loginInfo"></p>
+        <p id="joinInfo"></p>-->
+
+        <div data-role="content" class="container" role="main">
+            <ul class="content-reply-box mg10" id="messages">
+            </ul>
+        </div>
+
         <form action="">
             <input id="m" autocomplete="off" /><button id="sendMsg">Send</button><button id="leave">Leave</button>
     </div>
+
     <script>
-        // var socket = io();
+        function prependeEven(text)
+        {
+            var code1 = '<li class="even"><div class="reply-content-box"><div class="reply-content prr"><span class="arrow">&nbsp;</span>';
+            var code2 = '</div></div></li>';
+            var code = code1 + text + code2;
+            $('ul#messages').prepend(code);
+        }
+        function prependeOdd(text)
+        {
+            var code1 = '<li class="odd"><div class="reply-content-box"><div class="reply-content prl"><span class="arrow">&nbsp;</span>';
+            var code2 = '</div></div></li>';
+            var code = code1 + text + code2;
+            $('ul#messages').prepend(code);
+        }
+        function getUUid()
+        {
+            return new Date().getTime()+""+Math.floor(Math.random()*899+100);
+        }
+
+    </script>
+
+    <script>
         var socket = io();
         var username;
+        var userid;
         var room;
         $('button#login').click(function(){
             username = $('input#username').val();
-            socket.emit('login', {'username':username});
+            userid = getUUid();
+            socket.emit('login', {'username':username, 'userid':userid});
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:block");
             $('div#chatbox').attr("style", "display:none");
@@ -91,16 +93,16 @@
         });
         $('button#leave').click(function(){
             // console.log('room : ' + room + ' username : ' + username);
-            socket.emit('leave', {'room':room, 'username':username});
+            socket.emit('leave', {'room':room, 'username':username, 'userid':userid});
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:block");
             $('div#chatbox').attr("style", "display:none");
             return false;
         });
-        $('li#room').click(function(){
+        $('button#room').click(function(){
             room = $(this).text();
             // console.log('room : ' + room + ' username : ' + username);
-            socket.emit('join', {'room':room, 'username':username});
+            socket.emit('join', {'room':room, 'username':username, 'userid':userid});
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:none");
             $('div#chatbox').attr("style", "display:block");
@@ -109,6 +111,7 @@
         $('form').submit(function(){
             var message = {
                 'username' : username,
+                'userid' : userid,
                 'room' : room,
                 'content' : $('#m').val()
             };
@@ -120,7 +123,12 @@
             return false;
         });
         socket.on('chat message', function(msg){
-            $('#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
+            console.log("userid : " + msg.userid + ' ori : ' + userid);
+            if(msg.userid == userid)
+                prependeEven(msg.content);
+            else
+                prependeOdd(msg.content);
+            // $('ul#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
         });
         socket.on('loginInfo', function(obj){
             $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
@@ -129,13 +137,13 @@
             $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
         });
         socket.on('sysInfo', function(msg){
-            $('#messages').prepend($('<li>').text(msg));
+            $('ul#messages').prepend($('<li>').text(msg));
         });
         socket.on('joinInfo', function(obj){
-            $('p#joinInfo').text("房间内人数 ：" + obj.count);
+            $('a#joinInfo').text("房间内人数 ：" + obj.count);
         });
         socket.on('leaveInfo', function(obj){
-            $('p#joinInfo').text("房间内人数 ：" + obj.count);
+            $('a#joinInfo').text("房间内人数 ：" + obj.count);
         });
     </script>
 
