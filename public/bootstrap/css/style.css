@@ -3,11 +3,6 @@ body {
     font-family: 'Microsoft Yahei', 'Arial';
 }
 
-ul {
-    padding: 0;
-    margin: 0;
-}
-
 li {
     list-style: none;
 }
@@ -96,13 +91,21 @@ li {
 
 .content-reply-box {
     width: 100%;
-    overflow: hidden;
+    height: 600px;
+    overflow-y: scroll;
 }
 
 .content-reply-box li {
     width: 100%;
     overflow: hidden;
     margin-bottom: 2em;
+}
+
+.content-reply-box li.center {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 2em;
+    text-align: center;
 }
 
 .content-reply-box li.odd .user {
@@ -135,7 +138,7 @@ li {
     overflow: hidden;
 }
 
-.reply-time {
+.system-msg {
     color: #e1912d;
     font-size: .85em;
     display: inline-block;
