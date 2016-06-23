@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Socket.IO chat</title>
 
-    
+
     <!--<link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap-theme.min.css">
     <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
@@ -49,32 +49,32 @@
         <div data-role="content" class="container" role="main">
             <ul class="content-reply-box mg10" id="messages">
             </ul>
+            <ul class="operating row text-center linear-g">
+                <form action="">
+                    <input id="m" autocomplete="off" /><button id="sendMsg">Send</button><button id="leave">Leave</button>
+                </form>
+            </ul>
         </div>
-
-        <form action="">
-            <input id="m" autocomplete="off" /><button id="sendMsg">Send</button><button id="leave">Leave</button>
     </div>
 
     <script>
-        function prependeEven(text)
-        {
-            var code1 = '<li class="even"><div class="reply-content-box"><div class="reply-content prr"><span class="arrow">&nbsp;</span>';
+        function prependeEven(msg) {
+            var code1 = '<li class="even"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prr"><span class="arrow">&nbsp;</span>';
             var code2 = '</div></div></li>';
-            var code = code1 + text + code2;
+            var code = code1 + msg.content + code2;
             $('ul#messages').prepend(code);
-        }
-        function prependeOdd(text)
-        {
-            var code1 = '<li class="odd"><div class="reply-content-box"><div class="reply-content prl"><span class="arrow">&nbsp;</span>';
-            var code2 = '</div></div></li>';
-            var code = code1 + text + code2;
-            $('ul#messages').prepend(code);
-        }
-        function getUUid()
-        {
-            return new Date().getTime()+""+Math.floor(Math.random()*899+100);
         }
 
+        function prependeOdd(msg) {
+            var code1 = '<li class="odd"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prl"><span class="arrow">&nbsp;</span>';
+            var code2 = '</div></div></li>';
+            var code = code1 + msg.content + code2;
+            $('ul#messages').prepend(code);
+        }
+
+        function getUUid() {
+            return new Date().getTime() + "" + Math.floor(Math.random() * 899 + 100);
+        }
     </script>
 
     <script>
@@ -82,67 +82,87 @@
         var username;
         var userid;
         var room;
-        $('button#login').click(function(){
+        $('button#login').click(function() {
             username = $('input#username').val();
             userid = getUUid();
-            socket.emit('login', {'username':username, 'userid':userid});
+            socket.emit('login', {
+                'username': username,
+                'userid': userid
+            });
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:block");
             $('div#chatbox').attr("style", "display:none");
             return false;
         });
-        $('button#leave').click(function(){
+        $('button#leave').click(function() {
             // console.log('room : ' + room + ' username : ' + username);
-            socket.emit('leave', {'room':room, 'username':username, 'userid':userid});
+            socket.emit('leave', {
+                'room': room,
+                'username': username,
+                'userid': userid
+            });
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:block");
             $('div#chatbox').attr("style", "display:none");
             return false;
         });
-        $('button#room').click(function(){
+        $('button#room').click(function() {
             room = $(this).text();
             // console.log('room : ' + room + ' username : ' + username);
-            socket.emit('join', {'room':room, 'username':username, 'userid':userid});
+            socket.emit('join', {
+                'room': room,
+                'username': username,
+                'userid': userid
+            });
+            $('ul#messages').empty();
             $('div#loginbox').attr("style", "display:none");
             $('div#roombox').attr("style", "display:none");
             $('div#chatbox').attr("style", "display:block");
             return false;
         });
-        $('form').submit(function(){
+        $('form').submit(function() {
+            var smg = $("#m").val();
+            if (smg == null || smg == "" || smg == undefined) {
+                return false;
+            }
+            // socket.emit('chat message', $('#m').val());
             var message = {
-                'username' : username,
-                'userid' : userid,
-                'room' : room,
-                'content' : $('#m').val()
+                'username': username,
+                'userid': userid,
+                'room': room,
+                'content': $('#m').val()
             };
-            if(message.content != '')
-            {
+            if (message.content != '') {
                 socket.emit('chat message', message);
             }
             $('#m').val('');
             return false;
         });
-        socket.on('chat message', function(msg){
+        socket.on('chat message', function(msg) {
             console.log("userid : " + msg.userid + ' ori : ' + userid);
-            if(msg.userid == userid)
-                prependeEven(msg.content);
+            if (msg.userid == userid)
+                prependeEven(msg);
             else
-                prependeOdd(msg.content);
+                prependeOdd(msg);
             // $('ul#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
         });
-        socket.on('loginInfo', function(obj){
+        socket.on('loginInfo', function(obj) {
             $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
         });
-        socket.on('logoutInfo', function(obj){
+        socket.on('logoutInfo', function(obj) {
             $('p#loginInfo').text("在线人数 ：" + obj.onlineCount);
         });
-        socket.on('sysInfo', function(msg){
-            $('ul#messages').prepend($('<li>').text(msg));
+        socket.on('sysInfo', function(msg) {
+            var sysmsg = '<li class = "center" ><span class="system-msg">';
+            sysmsg += msg;
+            sysmsg += '</span></li>';
+            // $('ul#messages').prepend($('<li>').text(msg));
+            $('ul#messages').prepend(sysmsg);
         });
-        socket.on('joinInfo', function(obj){
+        socket.on('joinInfo', function(obj) {
             $('a#joinInfo').text("房间内人数 ：" + obj.count);
         });
-        socket.on('leaveInfo', function(obj){
+        socket.on('leaveInfo', function(obj) {
             $('a#joinInfo').text("房间内人数 ：" + obj.count);
         });
     </script>
