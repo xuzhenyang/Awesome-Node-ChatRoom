@@ -26,28 +26,31 @@ io.on('connection', function (socket) {
         console.log("userid : " + loginInfo.userid);
         //socket的name作为标识 用于logout
         socket.name = loginInfo.userid;
+        //socket的name2作为标识，用于登出时显示用户名
+        socket.name2 = loginInfo.username;
         if (!onlineUsers.hasOwnProperty(loginInfo.userid)) {
             onlineUsers[loginInfo.userid] = loginInfo.userid;
             onlineCount++;
         }
         io.emit('loginInfo', { onlineUsers: onlineUsers, onlineCount: onlineCount });
-        // io.emit('sysInfo', '----' + loginInfo.username + '已加入聊天' + '----');
     });
 
-    socket.on('join', function (loginInfo) {
-        console.log(loginInfo.username + "join in : " + loginInfo.room);
+    socket.on('join', function (joinInfo) {
+        console.log(joinInfo.username + "join in : " + joinInfo.room);
         //判断房间对象是否存在 若不存在则创建
-        if (!roomList.hasOwnProperty(loginInfo.room)) {
-            roomList[loginInfo.room] = new Room(loginInfo.room);
+        if (!roomList.hasOwnProperty(joinInfo.room)) {
+            roomList[joinInfo.room] = new Room(joinInfo.room);
         }
         //判断房间内的用户对象是否存在 若不存在则创建用户对象并统计人数
-        if (!(roomList[loginInfo.room].users).hasOwnProperty(loginInfo.userid)) {
-            roomList[loginInfo.room].users[loginInfo.userid] = loginInfo.userid;
-            roomList[loginInfo.room].count++;
+        if (!(roomList[joinInfo.room].users).hasOwnProperty(joinInfo.userid)) {
+            roomList[joinInfo.room].users[joinInfo.userid] = joinInfo.userid;
+            roomList[joinInfo.room].count++;
         }
-        socket.join(loginInfo.room);
-        io.to(loginInfo.room).emit('joinInfo', roomList[loginInfo.room]);
-        io.to(loginInfo.room).emit('sysInfo', '----' + loginInfo.username + " 加入 " + loginInfo.room + '----');
+        //把下面一段放进上面的if里...其他房间的人也能知道该用户加入了哪个房间...
+        //另外多次加入退出后好像也会出现该bug
+        socket.join(joinInfo.room);
+        io.to(joinInfo.room).emit('joinInfo', roomList[joinInfo.room]);
+        io.to(joinInfo.room).emit('sysInfo', '----' + joinInfo.username + " 加入 " + joinInfo.room + '----');
     });
 
     socket.on('chat message', function (msg) {
@@ -58,12 +61,17 @@ io.on('connection', function (socket) {
     socket.on('leave', function (leaveInfo) {
         console.log('user leave');
         // console.log('room ' + leaveInfo.room + ' username ' + leaveInfo.username);
+        //判断房间内的用户对象是否存在
         if ((roomList[leaveInfo.room].users).hasOwnProperty(socket.name)) {
             delete (roomList[leaveInfo.room].users)[socket.name];
             roomList[leaveInfo.room].count--;
+
         }
+        //把下面一段放进上面的if里...其他房间的人也能知道该用户退出了哪个房间...
+        //另外多次加入退出后好像也会出现该bug
         io.to(leaveInfo.room).emit('leaveInfo', roomList[leaveInfo.room]);
         io.to(leaveInfo.room).emit('sysInfo', '----' + leaveInfo.username + " 退出 " + leaveInfo.room + '----');
+
     });
 
     socket.on('disconnect', function () {
@@ -74,7 +82,7 @@ io.on('connection', function (socket) {
                 roomList[room].count--;
             }
             io.to(roomList[room].roomname).emit('leaveInfo', roomList[room]);
-            io.to(roomList[room].roomname).emit('sysInfo', '----' + socket.name + " 退出 " + roomList[room].roomname + '----');
+            io.to(roomList[room].roomname).emit('sysInfo', '----' + socket.name2 + " 退出 " + roomList[room].roomname + '----');
         }
 
         console.log('user disconnected');
