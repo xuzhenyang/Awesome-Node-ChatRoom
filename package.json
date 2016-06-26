@@ -1,7 +1,29 @@
 {
   "name": "Awesome-Node-ChatRoom",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "app",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/electron/electron-quick-start.git"
+  },
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/electron/electron-quick-start/issues"
+  },
+  "homepage": "https://github.com/electron/electron-quick-start#readme",
+  "devDependencies": {
+    "electron-prebuilt": "^1.2.0"
+  },
   "dependencies": {
     "express": "^4.10.2",
     "socket.io": "^1.4.6"
