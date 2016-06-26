@@ -77,6 +77,7 @@ io.on('connection', function (socket) {
             console.log('----delete user----');
             delete (roomList[leaveInfo.room].users)[socket.name];
             roomList[leaveInfo.room].count--;
+
         }
         socket.leave(leaveInfo.room);
         io.to(leaveInfo.room).emit('leaveInfo', roomList[leaveInfo.room]);
