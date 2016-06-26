@@ -51,7 +51,7 @@
             </ul>
             <ul class="operating row text-center linear-g">
                 <form action="">
-                    <input id="m" autocomplete="off" /><button id="sendMsg">Send</button><button id="leave">Leave</button>
+                    <input id="m" autocomplete="off" /><button id="sendMsg" style="margin-left: 5px" class="btn btn-default btn-info">Send</button><button id="leave" style="margin-left: 5px" class="btn btn-default btn-info">Leave</button>
                 </form>
             </ul>
         </div>
@@ -160,10 +160,19 @@
             $('ul#messages').prepend(sysmsg);
         });
         socket.on('joinInfo', function(obj) {
+<<<<<<< HEAD
             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
         });
         socket.on('leaveInfo', function(obj) {
             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
+=======
+             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
+            // $('a#joinInfo').text("房间内人数 ：" + obj.count);
+        });
+        socket.on('leaveInfo', function(obj) {
+             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
+            // $('a#joinInfo').text("房间内人数 ：" + obj.count);
+>>>>>>> 48f9a0973bf0b00e51c2c7403c5bfdc4903a000d
         });
     </script>
 
