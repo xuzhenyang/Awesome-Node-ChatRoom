@@ -91,7 +91,6 @@ li {
 
 .content-reply-box {
     width: 100%;
-    height: 600px;
     overflow-y: scroll;
 }
 
@@ -222,6 +221,14 @@ li {
 
 .mg10 {
     margin: 10px 0;
+}
+
+.bot {
+    position: fixed;
+    text-align: center;
+    bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .linear-g {

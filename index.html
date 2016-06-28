@@ -21,8 +21,9 @@
 </head>
 
 <body>
+
     <div id="loginbox" style="display:block">
-        <div style="margin-left: auto;margin-right: auto;margin-top: 100px;width: 20em;">
+        <div style="margin-left: auto;margin-right: auto;padding-top:100px;width: 20em;">
             <div class="input-group">
                 <span class="input-group-addon "><span class="glyphicon glyphicon-user"> </span></span>
                 <input id="username" type="text" class="form-control" placeholder="用户名" aria-describedby="basic-addon1">
@@ -31,50 +32,79 @@
         </div>
     </div>
     <div id="roombox" style="display:none">
-        <div style="margin-left: auto;margin-right: auto;margin-top: 100px;width: 20em;">
+        <div style="margin-left: auto;margin-right: auto;padding-top:100px;width: 20em;">
             <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间1</button>
             <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间2</button>
             <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间3</button>
             <button id="room" type="button" style="width:280px;margin-top: 10px;" class="btn btn-default btn-info">房间4</button>
         </div>
     </div>
-    <div id="chatbox" style="display:none">
-        <div data-role="header" class="header linear-g">
+    <div id="chatbox" data-role="page" style="display:none">
+        <div data-role="header" class="header linear-g" id="chatbox-head">
             <a id="joinInfo" class="text-center col-xs-8"></a>
-            <a href="#panel-right" data-iconpos="notext" class="glyphicon glyphicon-user col-xs-2 text-left"> </a>
+            <a id="getUserList" href="#panel-right" data-iconpos="notext" class="glyphicon glyphicon-user col-xs-2 text-left"> </a>
         </div>
         <!--<p id="loginInfo"></p>
         <p id="joinInfo"></p>-->
+        <div data-role="panel" data-position="right" data-display="push" class="user_box text-center dn linear-g" id="panel-right">
+            <div class="u_info" id="currentUsername">
+                <span class="username"></span>
+            </div>
+            <ul class="user_menu" id="currentUserlist">
+                <li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span> &nbsp;</a></li>
+                <li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span> &nbsp;</a></li>
+                <li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span> &nbsp;</a></li>
+                <li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span> &nbsp;</a></li>
+            </ul>
+        </div>
+        <div id="emojiImgs">
 
+        </div>
         <div data-role="content" class="container" role="main">
             <ul class="content-reply-box mg10" id="messages">
             </ul>
-            <ul class="operating row text-center linear-g">
+            <ul class="operating row text-center linear-g" id="reply-tool">
                 <form action="">
-                    <input id="m" autocomplete="off" /><button id="sendMsg" style="margin-left: 5px" class="btn btn-default btn-info">Send</button>
+                    <input id="m" autocomplete="off">
+                    <!--<button id="emojiImg" style="margin-left: 5px" class="btn btn-default btn-info">emoji</button>-->
+                    <button id="sendMsg" style="margin-left: 5px" class="btn btn-default btn-info">Send</button>
                     <button id="leave" style="margin-left: 5px" class="btn btn-default btn-info">Leave</button>
                 </form>
             </ul>
         </div>
     </div>
 
+    <script type="text/javascript" src="/bootstrap/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/jquery.mobile-1.4.0-rc.1.js"></script>
+    <script src="/bootstrap/js/emoji.js"></script>
     <script>
-        function prependeEven(msg) {
-            var code1 = '<li class="even"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prr"><span class="arrow">&nbsp;</span>';
+        function appendeEven(msg) {
+            var code1 = '<li class="even"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prr emoji"><span class="arrow">&nbsp;</span>';
             var code2 = '</div></div></li>';
             var code = code1 + msg.content + code2;
-            $('ul#messages').prepend(code);
+            $('ul#messages').append(code);
         }
 
-        function prependeOdd(msg) {
-            var code1 = '<li class="odd"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prl"><span class="arrow">&nbsp;</span>';
+        function appendeOdd(msg) {
+            var code1 = '<li class="odd"><a class="user" title="' + msg.username + '"><span class="user-name">' + msg.username + '</span></a><div class="reply-content-box"><div class="reply-content prl emoji"><span class="arrow">&nbsp;</span>';
             var code2 = '</div></div></li>';
             var code = code1 + msg.content + code2;
-            $('ul#messages').prepend(code);
+            $('ul#messages').append(code);
         }
 
         function getUUid() {
             return new Date().getTime() + "" + Math.floor(Math.random() * 899 + 100);
+        }
+
+        function changeWindowSize() {
+            var height = window.innerHeight;
+            console.log(height);
+            document.getElementsByTagName('body')[0].style.height = window.innerHeight + 'px';
+            var height1 = document.getElementById('chatbox-head').offsetHeight;
+            var height2 = document.getElementById('reply-tool').offsetHeight;
+            console.log('height1:' + height1);
+            console.log('height2:' + height2);
+            document.getElementById('messages').style.height = height - height1 - height2 - 40 + 'px';
         }
     </script>
 
@@ -83,29 +113,76 @@
         var username;
         var userid;
         var room;
-        $('button#login').click(function() {
-            username = $('input#username').val();
-            userid = getUUid();
-            socket.emit('login', {
-                'username': username,
-                'userid': userid
+
+        // window.onload = function() {
+        //     var emojiContainer = document.getElementById('emojiImgs')
+        //     var docFragment = document.createDocumentFragment();
+        //     var emojis = Emoji.allCode.split('|');
+        //     console.log(emojis);
+        //     for (var i = 69; i > 0; i--) {
+        //         var emojiItem = document.createElement('img');
+        //         emojiItem.src = '/bootstrap/img/' + i + '.gif';
+        //         emojiItem.title = i;
+        //         docFragment.appendChild(emojiItem);
+        //     };
+        //     emojiContainer.appendChild(docFragment);
+        //     document.getElementById('emojiImg').addEventListener('click', function(e) {
+        //         var emojiwrapper = document.getElementById('emojiImgs');
+        //         emojiwrapper.style.display = 'block';
+        //         e.stopPropagation();
+        //     }, false);
+        //     document.body.addEventListener('click', function(e) {
+        //         var emojiwrapper = document.getElementById('emojiImgs');
+        //         if (e.target != emojiwrapper) {
+        //             emojiwrapper.style.display = 'none';
+        //         };
+        //     });
+        // }
+
+        $(document).ready(function() {
+            $(window).resize(changeWindowSize);
+            $('#getUserList').click(function() {
+                socket.emit('getUserList', {
+                    'room': room
+                });
             });
-            $('div#loginbox').attr("style", "display:none");
-            $('div#roombox').attr("style", "display:block");
-            $('div#chatbox').attr("style", "display:none");
-            return false;
-        });
-        $('button#leave').click(function() {
-            // console.log('room : ' + room + ' username : ' + username);
-            socket.emit('leave', {
-                'room': room,
-                'username': username,
-                'userid': userid
+            $('button#login').click(function() {
+                username = $('input#username').val();
+                userid = getUUid();
+                socket.emit('login', {
+                    'username': username,
+                    'userid': userid
+                });
+                // $('div#loginbox').attr("style", "display:none");
+                // $('div#roombox').attr("style", "display:block");
+                // $('div#chatbox').attr("style", "display:none");
+                // $('div#chatbox').style.display = "none";
+                // $('div#roombox').style.dispaly = "block";
+                // $('div#chatbox').style.dispaly = "none";
+                $('div#loginbox').css("display", "none");
+                $('div#roombox').css("display", "block");
+                $('div#chatbox').css("display", "none");
+                console.log(Emoji.reg);
+                return false;
             });
-            $('div#loginbox').attr("style", "display:none");
-            $('div#roombox').attr("style", "display:block");
-            $('div#chatbox').attr("style", "display:none");
-            return false;
+            $('button#leave').click(function() {
+                // console.log('room : ' + room + ' username : ' + username);
+                socket.emit('leave', {
+                    'room': room,
+                    'username': username,
+                    'userid': userid
+                });
+                // $('div#loginbox').attr("style", "display:none");
+                // $('div#roombox').attr("style", "display:block");
+                // $('div#chatbox').attr("style", "display:none");
+                // $('div#chatbox').style.display = "none";
+                // $('div#roombox').style.dispaly = "block";
+                // $('div#chatbox').style.dispaly = "none";
+                $('div#loginbox').css("display", "none");
+                $('div#roombox').css("display", "block");
+                $('div#chatbox').css("display", "none");
+                return false;
+            });
         });
         $('button#room').click(function() {
             room = $(this).text();
@@ -116,9 +193,16 @@
                 'userid': userid
             });
             $('ul#messages').empty();
-            $('div#loginbox').attr("style", "display:none");
-            $('div#roombox').attr("style", "display:none");
-            $('div#chatbox').attr("style", "display:block");
+            // $('div#loginbox').attr("style", "display:none");
+            // $('div#roombox').attr("style", "display:none");
+            // $('div#chatbox').attr("style", "display:block");
+            // $('div#chatbox').style.display = "none";
+            // $('div#roombox').style.dispaly = "none";
+            // $('div#chatbox').style.dispaly = "block";
+            $('div#loginbox').css("display", "none");
+            $('div#roombox').css("display", "none");
+            $('div#chatbox').css("display", "block");
+            changeWindowSize();
             return false;
         });
         $('form').submit(function() {
@@ -141,24 +225,73 @@
         });
         socket.on('chat message', function(msg) {
             console.log("userid : " + msg.userid + ' ori : ' + userid);
-            if (msg.userid == userid)
-                prependeEven(msg);
-            else
-                prependeOdd(msg);
-            // $('ul#messages').prepend($('<li>').text(msg.username + ' : ' + msg.content));
+            if (msg.userid == userid) {
+                appendeEven(msg);
+            } else {
+                appendeOdd(msg);
+            }
+            // console.log(document.getElementById('messages').scrollHeight);
+            // console.log($("#messages").offsetHeight);
+            document.getElementById("messages").scrollTop = document.getElementById('messages').scrollHeight;
+            // $('ul#messages').append($('<li>').text(msg.username + ' : ' + msg.content));
+            $('.emoji').emoji();
         });
         socket.on('sysInfo', function(msg) {
-            var sysmsg = '<li class = "center" ><span class="system-msg">';
+            var sysmsg = '<li class = "center" ><span class="system-msg emoji">';
             sysmsg += msg;
             sysmsg += '</span></li>';
-            // $('ul#messages').prepend($('<li>').text(msg));
-            $('ul#messages').prepend(sysmsg);
+            // $('ul#messages').append($('<li>').text(msg));
+            $('ul#messages').append(sysmsg);
+            // $("#messages").scrollTop = $("#messages").offsetHeight;
+            document.getElementById("messages").scrollTop = document.getElementById('messages').scrollHeight;
+            $('.emoji').emoji();
         });
         socket.on('joinInfo', function(obj) {
             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
         });
         socket.on('leaveInfo', function(obj) {
             $('a#joinInfo').text(obj.roomname + " 人数：" + obj.count);
+
+        });
+        socket.on('getUserList', function(obj) {
+            $('#currentUsername').empty();
+            $('#currentUserlist').empty();
+            console.log(obj.length);
+            console.log(obj);
+            // it doesn't run
+            // for (var i = 0; i < obj.length; i++) {
+            //     console.log(i);
+            //     if (obj[i].userid == userid) {
+            //         var code = '<span class="username ">' + obj[i].username + '</span>';
+            //         $('#currentUsername').append(code);
+            //     } else {
+            //         var code = '<li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span>&nbsp;' + obj[i].username + '</a></li>';
+            //         $('#currentUserlist').append(code);
+            //     }
+            // }
+            // it doesn't run;
+            // obj.forEach(function(e) {
+            //         if (e.userid == userid) {
+            //             // <span class="username">用户名字</span>
+            //             var code = '<span class="username ">' + e.username + '</span>';
+
+            //         } else {
+            //             // <li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span> &nbsp;用户名字</a></li>
+            //             var code = '<li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span>&nbsp;' + e.username + '</a></li>'
+            //         }
+            //     })
+            // function2 for Traversal
+            for (var user in obj) {
+                console.log(user);
+                if (obj[user].userid == userid) {
+                    var code = '<span class="username ">' + obj[user].username + '</span>';
+                    $('#currentUsername').append(code);
+                } else {
+                    var code = '<li class="menu"><a href="#"><span class="glyphicon glyphicon-user"> </span>&nbsp;' + obj[user].username + '</a></li>';
+                    $('#currentUserlist').append(code);
+                }
+            }
+            $('.emoji').emoji();
         });
     </script>
 
