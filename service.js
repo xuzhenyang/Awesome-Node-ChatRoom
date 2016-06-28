@@ -3,28 +3,31 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
 app.use(express.static('public'));
 
 var roomList = {};
-var Room = function (roomname) {
+var Room = function(roomname) {
     this.roomname = roomname;
     this.users = {};
     this.count = 0;
 };
-var User = function (userid, username) {
+var User = function(userid, username) {
     this.userid = userid;
     this.username = username;
 }
 
 function showAllRoom() {
     console.log('---showAllRoom---');
+    var users;
+    var room;
     // console.log(roomList);
     for (room in roomList) {
         console.log('--' + roomList[room].roomname + '--');
+        // console.log(room);
         for (user in roomList[room].users) {
             console.log(roomList[room].users[user].userid + ' : ' + roomList[room].users[user].username);
         }
@@ -32,10 +35,10 @@ function showAllRoom() {
     console.log('---showAllRoom---');
 }
 
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
     console.log("a user connected");
 
-    socket.on('login', function (loginInfo) {
+    socket.on('login', function(loginInfo) {
         console.log("username : " + loginInfo.username);
         console.log("userid : " + loginInfo.userid);
         //socket的name作为标识 用于logout
@@ -45,7 +48,7 @@ io.on('connection', function (socket) {
         io.emit('loginInfo', 'login success...');
     });
 
-    socket.on('join', function (joinInfo) {
+    socket.on('join', function(joinInfo) {
         console.log('socketname ' + socket.name + ' ：' + joinInfo.username + " 想要加入 " + joinInfo.room);
         //判断房间对象是否存在 若不存在则创建
         if (!roomList.hasOwnProperty(joinInfo.room)) {
@@ -64,18 +67,18 @@ io.on('connection', function (socket) {
         io.to(joinInfo.room).emit('sysInfo', '----' + joinInfo.username + " 加入 " + joinInfo.room + '----');
     });
 
-    socket.on('chat message', function (msg) {
+    socket.on('chat message', function(msg) {
         io.to(msg.room).emit('chat message', msg);
         console.log('chat message', msg.content);
     });
 
-    socket.on('leave', function (leaveInfo) {
+    socket.on('leave', function(leaveInfo) {
         console.log('user leave');
         // console.log('room ' + leaveInfo.room + ' username ' + leaveInfo.username);
         //判断房间内的用户对象是否存在
         if ((roomList[leaveInfo.room].users).hasOwnProperty(socket.name)) {
             console.log('----delete user----');
-            delete (roomList[leaveInfo.room].users)[socket.name];
+            delete(roomList[leaveInfo.room].users)[socket.name];
             roomList[leaveInfo.room].count--;
 
         }
@@ -85,12 +88,12 @@ io.on('connection', function (socket) {
 
     });
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function() {
         console.log('user disconnected');
         for (room in roomList) {
             // console.log(roomList[room].users);
             if ((roomList[room].users).hasOwnProperty(socket.name)) {
-                delete (roomList[room].users)[socket.name];
+                delete(roomList[room].users)[socket.name];
                 roomList[room].count--;
             }
             io.to(roomList[room].roomname).emit('leaveInfo', roomList[room]);
@@ -98,9 +101,16 @@ io.on('connection', function (socket) {
         }
         io.emit('logoutInfo', 'logout success...');
     });
+
+    socket.on("getUserList", function(info) {
+        console.log("get userList");
+        // console.log(roomList[info.room].users);
+        // showAllRoom();
+        io.to(info.room).emit('getUserList', roomList[info.room].users);
+    });
 });
 
-http.listen(3000, function () {
+http.listen(3000, function() {
     console.log('listening on *:3000');
 });
 
